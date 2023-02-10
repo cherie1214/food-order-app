@@ -9,9 +9,31 @@ const defaultCartState = {
 
 const cartReducer = (state, action) => {
   if (action.type === "ADD") {
-    const updatedItems = state.items.concat(action.item);
     const updatedTotalAmount =
       state.totalAmount + action.item.price * action.item.amount;
+
+    // findIndex(() ⇒ {})  ### 배열 안에 있는 값이 객체이거나 특정 조건으로 index(몇 번째인지)를 찾을 때 사용한다.
+    const existingCartItemIndex = state.items.findIndex(
+      (item) => item.id === action.item.id
+    );
+    const existingCartItem = state.items[existingCartItemIndex];
+    let updatedItems;
+
+    if (existingCartItem) {
+      // item이 이미 장바구니에 있는 경우: 기존 아이템에 amount 더하기
+      const updatedItem = {
+        ...existingCartItem,
+        amount: existingCartItem.amount + action.item.amount,
+      };
+      updatedItems = [...state.items];
+      updatedItems[existingCartItemIndex] = updatedItem;
+    } else {
+      // item이 장바구니에 없는 경우: 새로운 배열로 추가
+
+      // concat(arr) ### 배열을 합쳐서 반환. 원래 있던 배열을 바꾸지 않고 새로운 배열을 생성한다.
+      updatedItems = state.items.concat(action.item);
+    }
+
     return {
       items: updatedItems,
       totalAmount: updatedTotalAmount,
