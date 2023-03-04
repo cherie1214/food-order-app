@@ -6,44 +6,50 @@ import MealItem from "./MealItem/MealItem";
 
 const AvailableMeals = () => {
   const [meals, setMeals] = useState([]);
-  const [error, setError] = useState(null);
+  const [httpError, setHttpError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchMeals = async function () {
-      setError(null);
-      try {
-        const response = await fetch(
-          "https://react-http-39ce8-default-rtdb.firebaseio.com/meals.json"
-        );
-        if (!response.ok) {
-          throw new Error("무언가 잘못 되었다!");
-        }
-        const data = await response.json();
-        const loadedMeals = [];
-        for (const key in data) {
-          loadedMeals.push({
-            id: key,
-            name: data[key].name,
-            description: data[key].description,
-            price: data[key].price,
-          });
-        }
-        setMeals(loadedMeals);
-        setIsLoading(false);
-      } catch (error) {
-        setError(error.message);
+      const response = await fetch(
+        "https://react-http-39ce8-default-rtdb.firebaseio.com/meals.json"
+      );
+      if (!response.ok) {
+        throw new Error("무언가 잘못 되었다!");
       }
+      const data = await response.json();
+      const loadedMeals = [];
+      for (const key in data) {
+        loadedMeals.push({
+          id: key,
+          name: data[key].name,
+          description: data[key].description,
+          price: data[key].price,
+        });
+      }
+      setMeals(loadedMeals);
+      setIsLoading(false);
     };
 
-    fetchMeals();
-  }, [error]);
+    fetchMeals().catch((error) => {
+      setIsLoading(false);
+      setHttpError(error.message);
+    });
+  }, []);
   console.log(meals);
 
   if (isLoading) {
     return (
       <section className={classes.mealsLoading}>
         <p>Loading...</p>
+      </section>
+    );
+  }
+
+  if (httpError) {
+    return (
+      <section className={classes.mealsError}>
+        <p>{httpError}</p>
       </section>
     );
   }
