@@ -40,6 +40,15 @@ const Cart = (props) => {
     setIsCheckout(true);
   };
 
+  const submitOrderHander = (userData) => {
+    console.log("order!");
+    fetch("https://react-http-39ce8-default-rtdb.firebaseio.com/order.json", {
+      method: "POST",
+      header: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user: userData, orderedItems: cartCtx.items }),
+    });
+  };
+
   const modalActions = (
     <div className={classes.actions}>
       <button className={classes["button--alt"]} onClick={props.onHideCart}>
@@ -60,7 +69,12 @@ const Cart = (props) => {
         <span>총 수량</span>
         <span>{totalAmount}</span>
       </div>
-      {isCheckout && <Checkout onCancle={props.onHideCart} />}
+      {isCheckout && (
+        <Checkout
+          onCancle={props.onHideCart}
+          onSubmitOrder={submitOrderHander}
+        />
+      )}
       {!isCheckout && modalActions}
     </Modal>
   );

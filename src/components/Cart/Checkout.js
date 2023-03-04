@@ -49,7 +49,12 @@ const Checkout = (props) => {
       return;
     }
 
-    console.log("모든 입력이 유효한 상태!");
+    props.onSubmitOrder({
+      name: enteredName,
+      city: enteredCity,
+      street: enteredStreet,
+      postal: enteredPostal,
+    });
   };
 
   const nameControlClasses = `${classes.control} ${
