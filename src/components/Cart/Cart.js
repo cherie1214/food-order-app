@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import React, { Fragment, useContext, useState } from "react";
 import CartContext from "../../store/cart-context";
 import Modal from "../UI/Modal";
 
@@ -8,6 +8,9 @@ import Checkout from "./Checkout";
 
 const Cart = (props) => {
   const [isCheckout, setIsCheckout] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [didSubmit, setDidSubmit] = useState(false);
+
   const cartCtx = useContext(CartContext);
 
   const totalAmount = `$${cartCtx.totalAmount.toFixed(2)}`; // 앞에 $를 넣기 위헤 템플릿 리터럴 표기
@@ -40,13 +43,19 @@ const Cart = (props) => {
     setIsCheckout(true);
   };
 
-  const submitOrderHander = (userData) => {
-    console.log("order!");
-    fetch("https://react-http-39ce8-default-rtdb.firebaseio.com/order.json", {
-      method: "POST",
-      header: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user: userData, orderedItems: cartCtx.items }),
-    });
+  const submitOrderHander = async (userData) => {
+    setIsSubmitting(true);
+    await fetch(
+      "https://react-http-39ce8-default-rtdb.firebaseio.com/order.json",
+      {
+        method: "POST",
+        header: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user: userData, orderedItems: cartCtx.items }),
+      }
+    );
+    setIsSubmitting(false);
+    setDidSubmit(true);
+    cartCtx.clearCart();
   };
 
   const modalActions = (
@@ -62,8 +71,8 @@ const Cart = (props) => {
     </div>
   );
 
-  return (
-    <Modal onClose={props.onHideCart}>
+  const cartModalContent = (
+    <Fragment>
       {cartItems}
       <div className={classes.total}>
         <span>총 수량</span>
@@ -76,6 +85,25 @@ const Cart = (props) => {
         />
       )}
       {!isCheckout && modalActions}
+    </Fragment>
+  );
+
+  const didSubmitModalContent = (
+    <Fragment>
+      <p>주문이 완료되었습니다!</p>
+      <div className={classes.actions}>
+        <button className={classes.button} onClick={props.onHideCart}>
+          닫기
+        </button>
+      </div>
+    </Fragment>
+  );
+
+  return (
+    <Modal onClose={props.onHideCart}>
+      {!isSubmitting && !didSubmit && cartModalContent}
+      {isSubmitting && <p>주문 중입니다...</p>}
+      {!isSubmitting && didSubmit && didSubmitModalContent}
     </Modal>
   );
 };
