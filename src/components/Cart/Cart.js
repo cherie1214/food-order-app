@@ -1,11 +1,13 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import CartContext from "../../store/cart-context";
 import Modal from "../UI/Modal";
 
 import classes from "./Cart.module.css";
 import CartItem from "./CartItem";
+import Checkout from "./Checkout";
 
 const Cart = (props) => {
+  const [isCheckout, setIsCheckout] = useState(false);
   const cartCtx = useContext(CartContext);
 
   const totalAmount = `$${cartCtx.totalAmount.toFixed(2)}`; // 앞에 $를 넣기 위헤 템플릿 리터럴 표기
@@ -35,8 +37,21 @@ const Cart = (props) => {
   );
 
   const orderHandler = () => {
-    console.log("order");
+    setIsCheckout(true);
   };
+
+  const modalActions = (
+    <div className={classes.actions}>
+      <button className={classes["button--alt"]} onClick={props.onHideCart}>
+        닫기
+      </button>
+      {hasItem && (
+        <button className={classes.button} onClick={orderHandler}>
+          주문하기
+        </button>
+      )}
+    </div>
+  );
 
   return (
     <Modal onClose={props.onHideCart}>
@@ -45,16 +60,8 @@ const Cart = (props) => {
         <span>총 수량</span>
         <span>{totalAmount}</span>
       </div>
-      <div className={classes.actions}>
-        <button className={classes["button--alt"]} onClick={props.onHideCart}>
-          닫기
-        </button>
-        {hasItem && (
-          <button className={classes.button} onClick={orderHandler}>
-            주문하기
-          </button>
-        )}
-      </div>
+      {isCheckout && <Checkout onCancle={props.onHideCart} />}
+      {!isCheckout && modalActions}
     </Modal>
   );
 };
